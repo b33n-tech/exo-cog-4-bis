@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let llmData = null;
 
-  // --- Render modules ---
   function renderModules() {
     if (!llmData) return;
 
@@ -102,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Charger JSON ---
+  // Charger JSON
   loadBtn.addEventListener("click", () => {
     const file = uploadJson.files[0];
     if (!file) { alert("Choisis un fichier JSON LLM !"); return; }
@@ -121,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsText(file);
   });
 
-  // --- Générer Mail GPT ---
+  // Générer Mail GPT
   generateMailBtn.addEventListener("click", () => {
     if (!llmData?.messages) return;
     const selectedMessages = llmData.messages.filter(m => m.envoyé);
@@ -132,17 +131,18 @@ document.addEventListener("DOMContentLoaded", () => {
     navigator.clipboard.writeText(`${promptTexte}\n\n${content}`)
       .then(() => alert("Prompt + messages copiés dans le presse-papiers !"))
       .catch(err => console.error("Erreur copie: ", err));
-    window.open("https://chatgpt.com/", "_blank");
+    window.open("https://chat.openai.com/", "_blank");
   });
 
-  // --- Génération livrables ---
+  // Générer livrables
   function generateTemplate(l) {
-    // DOCX
     if (l.type === "docx") {
       const { Document, Packer, Paragraph, TextRun } = docx;
       const doc = new Document({
         sections: [{
-          children: (l.template.plan || []).map(p => new Paragraph({ children: [new TextRun({ text: p, bold: true, size: 24 }), new TextRun({ text: "\n\n" })] }))
+          children: (l.template.plan || []).map(p => new Paragraph({
+            children: [new TextRun({ text: p, bold:true, size:24 }), new TextRun({ text:"\n\n" })]
+          }))
         }]
       });
       Packer.toBlob(doc).then(blob => {
@@ -151,26 +151,20 @@ document.addEventListener("DOMContentLoaded", () => {
         a.download = `${l.titre}.docx`;
         a.click();
       });
-    } 
-    // PPTX
-    else if (l.type === "pptx") {
+    } else if (l.type === "pptx") {
       const pptx = new PptxGenJS();
-      (l.template.slides || []).forEach(slideTitle => {
+      (l.template.slides || []).forEach(s => {
         const slide = pptx.addSlide();
-        slide.addText(slideTitle, { x:1, y:1, fontSize:24 });
+        slide.addText(s, { x:1, y:1, fontSize:24, color:"363636" });
       });
       pptx.writeFile({ fileName: `${l.titre}.pptx` });
-    } 
-    // XLSX
-    else if (l.type === "xlsx") {
+    } else if (l.type === "xlsx") {
       const wb = XLSX.utils.book_new();
       (l.template.sheets || []).forEach(sheetName => {
         const ws = XLSX.utils.aoa_to_sheet([[""]]);
         XLSX.utils.book_append_sheet(wb, ws, sheetName);
       });
       XLSX.writeFile(wb, `${l.titre}.xlsx`);
-    } 
-    else alert("Type de livrable inconnu !");
+    }
   }
-
 });
