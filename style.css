@@ -6,15 +6,8 @@ body {
   color: #333;
 }
 
-h1 {
-  color: #222;
-  margin-bottom: 20px;
-}
-
-h2 {
-  margin-top: 20px;
-  color: #333;
-}
+h1 { color: #222; margin-bottom: 20px; }
+h2 { margin-top: 20px; color: #333; }
 
 /* --- Modules --- */
 .module {
@@ -44,32 +37,13 @@ h2 {
 }
 
 /* --- Lists --- */
-ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-li {
-  margin: 5px 0;
-}
+ul { list-style: none; padding-left: 0; }
+li { margin: 5px 0; }
 
 /* --- Tables --- */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-th {
-  background: #f0a500;
-  color: white;
-  text-align: left;
-}
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+th { background: #f0a500; color: white; text-align: left; }
 
 /* --- Buttons --- */
 button {
@@ -81,15 +55,10 @@ button {
   cursor: pointer;
   transition: 0.2s;
 }
-
-button:hover {
-  opacity: 0.85;
-}
+button:hover { opacity: 0.85; }
 
 /* --- File input --- */
-input[type="file"] {
-  padding: 5px;
-}
+input[type="file"] { padding: 5px; }
 
 /* --- Mail actions --- */
 .mail-actions {
@@ -105,7 +74,5 @@ input[type="file"] {
     flex-direction: column;
     align-items: flex-start;
   }
-  table, th, td {
-    font-size: 14px;
-  }
+  table, th, td { font-size: 14px; }
 }
