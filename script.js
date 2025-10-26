@@ -137,7 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.onload = e => {
       try {
         llmData = JSON.parse(e.target.result);
-        console.log("JSON chargé :", llmData);
         renderModules();
         uploadStatus.textContent = `Fichier "${file.name}" chargé avec succès !`;
       } catch (err) {
@@ -165,25 +164,4 @@ document.addEventListener("DOMContentLoaded", () => {
     const finalPrompt = `${promptTexte}\n\n${content}`;
     navigator.clipboard.writeText(finalPrompt)
       .then(() => alert("Prompt + messages copiés dans le presse-papiers !"))
-      .catch(err => console.error("Erreur copie: ", err));
-    window.open("https://chatgpt.com/", "_blank");
-  });
-
-  // --- Générer Livrable ---
-  function generateTemplate(l) {
-    if(l.type === "docx") {
-      const content = l.template?.plan?.map(p => `# ${p}\n\n`).join("") || "Rapport vide";
-      const blob = new Blob([content], {type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `${l.titre}.docx`;
-      a.click();
-    } else if(l.type === "pptx") {
-      alert("Téléchargement PPTX - à implémenter avec pptxgenjs");
-    } else if(l.type === "xlsx") {
-      alert("Téléchargement XLSX - à implémenter avec SheetJS");
-    } else {
-      alert("Type de livrable inconnu !");
-    }
-  }
-});
+      .catch(err
