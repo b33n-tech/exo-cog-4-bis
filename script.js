@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderModules() {
     if (!llmData) return;
 
-    // Jalons
+    // --- Jalons ---
     jalonsList.innerHTML = "";
     (llmData.jalons || []).forEach(j => {
       const li = document.createElement("li");
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
       jalonsList.appendChild(li);
     });
 
-    // Messages
+    // --- Messages ---
     messagesTableBody.innerHTML = "";
     (llmData.messages || []).forEach(m => {
       const tr = document.createElement("tr");
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
       messagesTableBody.appendChild(tr);
     });
 
-    // RDV
+    // --- RDV ---
     rdvList.innerHTML = "";
     (llmData.rdv || []).forEach(r => {
       const li = document.createElement("li");
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rdvList.appendChild(li);
     });
 
-    // Autres ressources
+    // --- Autres ressources ---
     autresList.innerHTML = "";
     (llmData.autresModules || []).forEach(m => {
       const li = document.createElement("li");
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
       autresList.appendChild(li);
     });
 
-    // Livrables
+    // --- Livrables ---
     livrablesList.innerHTML = "";
     (llmData.livrables || []).forEach(l => {
       const li = document.createElement("li");
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Charger JSON
+  // --- Charger JSON ---
   loadBtn.addEventListener("click", () => {
     const file = uploadJson.files[0];
     if (!file) { alert("Choisis un fichier JSON LLM !"); return; }
@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsText(file);
   });
 
-  // Générer Mail GPT
+  // --- Générer Mail GPT ---
   generateMailBtn.addEventListener("click", () => {
     if (!llmData?.messages) return;
     const selectedMessages = llmData.messages.filter(m => m.envoyé);
@@ -134,23 +134,27 @@ document.addEventListener("DOMContentLoaded", () => {
     window.open("https://chat.openai.com/", "_blank");
   });
 
-  // Générer livrables
+  // --- Générer livrables ---
   function generateTemplate(l) {
+    // --- DOCX ---
     if (l.type === "docx") {
-      const { Document, Packer, Paragraph, TextRun } = docx;
-      const doc = new Document({
+      const doc = new docx.Document({
         sections: [{
-          children: (l.template.plan || []).map(p => new Paragraph({
-            children: [new TextRun({ text: p, bold:true, size:24 }), new TextRun({ text:"\n\n" })]
-          }))
+          children: (l.template.plan || []).map(p =>
+            new docx.Paragraph({
+              children: [new docx.TextRun({ text: p, bold:true, size:24 })]
+            })
+          )
         }]
       });
-      Packer.toBlob(doc).then(blob => {
+      docx.Packer.toBlob(doc).then(blob => {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
         a.download = `${l.titre}.docx`;
         a.click();
       });
+
+    // --- PPTX ---
     } else if (l.type === "pptx") {
       const pptx = new PptxGenJS();
       (l.template.slides || []).forEach(s => {
@@ -158,6 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
         slide.addText(s, { x:1, y:1, fontSize:24, color:"363636" });
       });
       pptx.writeFile({ fileName: `${l.titre}.pptx` });
+
+    // --- XLSX ---
     } else if (l.type === "xlsx") {
       const wb = XLSX.utils.book_new();
       (l.template.sheets || []).forEach(sheetName => {
