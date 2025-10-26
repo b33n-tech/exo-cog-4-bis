@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const messagesTableBody = document.querySelector("#messagesTable tbody");
   const rdvList = document.getElementById("rdvList");
   const autresList = document.getElementById("autresList");
+  const livrablesList = document.getElementById("livrablesList");
   const uploadJson = document.getElementById("uploadJson");
   const loadBtn = document.getElementById("loadBtn");
   const uploadStatus = document.getElementById("uploadStatus");
@@ -71,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- RDV ---
     rdvList.innerHTML = "";
     if (llmData.rdv?.length) {
-      llvList.innerHTML = "";
       llmData.rdv.forEach(r => {
         const li = document.createElement("li");
         li.innerHTML = `<strong>${r.titre || "Sans titre"}</strong> - ${r.date || "N/A"} (${r.durée || "N/A"}) - Participants: ${(r.participants || []).join(", ")}`;
@@ -104,6 +104,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     } else {
       autresList.innerHTML = "<li>Aucune ressource à afficher</li>";
+    }
+
+    // --- Livrables ---
+    livrablesList.innerHTML = "";
+    if (llmData.livrables?.length) {
+      llmData.livrables.forEach(l => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${l.titre}</strong> (${l.type})`;
+
+        const btn = document.createElement("button");
+        btn.textContent = "Télécharger Template";
+        btn.addEventListener("click", () => generateTemplate(l));
+        li.appendChild(document.createTextNode(" "));
+        li.appendChild(btn);
+
+        livrablesList.appendChild(li);
+      });
+    } else {
+      livrablesList.innerHTML = "<li>Aucun livrable à afficher</li>";
     }
   }
 
@@ -149,4 +168,22 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error("Erreur copie: ", err));
     window.open("https://chatgpt.com/", "_blank");
   });
+
+  // --- Générer Livrable ---
+  function generateTemplate(l) {
+    if(l.type === "docx") {
+      const content = l.template?.plan?.map(p => `# ${p}\n\n`).join("") || "Rapport vide";
+      const blob = new Blob([content], {type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${l.titre}.docx`;
+      a.click();
+    } else if(l.type === "pptx") {
+      alert("Téléchargement PPTX - à implémenter avec pptxgenjs");
+    } else if(l.type === "xlsx") {
+      alert("Téléchargement XLSX - à implémenter avec SheetJS");
+    } else {
+      alert("Type de livrable inconnu !");
+    }
+  }
 });
