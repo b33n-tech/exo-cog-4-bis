@@ -23,103 +23,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Jalons
     jalonsList.innerHTML = "";
-    if (llmData.jalons?.length) {
-      llmData.jalons.forEach(j => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${j.titre}</strong> (${j.datePrévue})`;
-        if (j.sousActions?.length) {
-          const subUl = document.createElement("ul");
-          j.sousActions.forEach(s => {
-            const subLi = document.createElement("li");
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.checked = s.statut === "fait";
-            cb.addEventListener("change", () => s.statut = cb.checked ? "fait" : "à faire");
-            subLi.appendChild(cb);
-            subLi.appendChild(document.createTextNode(s.texte));
-            subUl.appendChild(subLi);
-          });
-          li.appendChild(subUl);
-        }
-        jalonsList.appendChild(li);
-      });
-    } else {
-      jalonsList.innerHTML = "<li>Aucun jalon à afficher</li>";
-    }
+    (llmData.jalons || []).forEach(j => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${j.titre}</strong> (${j.datePrévue})`;
+      if (j.sousActions?.length) {
+        const subUl = document.createElement("ul");
+        j.sousActions.forEach(s => {
+          const subLi = document.createElement("li");
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = s.statut === "fait";
+          cb.addEventListener("change", () => s.statut = cb.checked ? "fait" : "à faire");
+          subLi.appendChild(cb);
+          subLi.appendChild(document.createTextNode(s.texte));
+          subUl.appendChild(subLi);
+        });
+        li.appendChild(subUl);
+      }
+      jalonsList.appendChild(li);
+    });
 
     // Messages
     messagesTableBody.innerHTML = "";
-    if (llmData.messages?.length) {
-      llmData.messages.forEach(m => {
-        const tr = document.createElement("tr");
-        const tdCheck = document.createElement("td");
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.checked = m.envoyé;
-        cb.addEventListener("change", () => m.envoyé = cb.checked);
-        tdCheck.appendChild(cb);
-        tr.appendChild(tdCheck);
-        tr.appendChild(document.createElement("td")).textContent = m.destinataire;
-        tr.appendChild(document.createElement("td")).textContent = m.sujet;
-        tr.appendChild(document.createElement("td")).textContent = m.texte;
-        messagesTableBody.appendChild(tr);
-      });
-    } else {
-      messagesTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center">Aucun message à afficher</td></tr>`;
-    }
+    (llmData.messages || []).forEach(m => {
+      const tr = document.createElement("tr");
+      const tdCheck = document.createElement("td");
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = m.envoyé;
+      cb.addEventListener("change", () => m.envoyé = cb.checked);
+      tdCheck.appendChild(cb);
+      tr.appendChild(tdCheck);
+      tr.appendChild(document.createElement("td")).textContent = m.destinataire;
+      tr.appendChild(document.createElement("td")).textContent = m.sujet;
+      tr.appendChild(document.createElement("td")).textContent = m.texte;
+      messagesTableBody.appendChild(tr);
+    });
 
     // RDV
     rdvList.innerHTML = "";
-    if (llmData.rdv?.length) {
-      llmData.rdv.forEach(r => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${r.titre}</strong> - ${r.date} (${r.durée}) - Participants: ${r.participants.join(", ")}`;
-        rdvList.appendChild(li);
-      });
-    } else {
-      rdvList.innerHTML = "<li>Aucun rendez-vous à afficher</li>";
-    }
+    (llmData.rdv || []).forEach(r => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${r.titre}</strong> - ${r.date} (${r.durée}) - Participants: ${r.participants.join(", ")}`;
+      rdvList.appendChild(li);
+    });
 
     // Autres ressources
     autresList.innerHTML = "";
-    if (llmData.autresModules?.length) {
-      llmData.autresModules.forEach(m => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${m.titre}</strong>`;
-        if (m.items?.length) {
-          const subUl = document.createElement("ul");
-          m.items.forEach(it => {
-            const subLi = document.createElement("li");
-            const a = document.createElement("a");
-            a.href = it.lien;
-            a.textContent = it.nom;
-            a.target = "_blank";
-            subLi.appendChild(a);
-            subUl.appendChild(subLi);
-          });
-          li.appendChild(subUl);
-        }
-        autresList.appendChild(li);
-      });
-    } else {
-      autresList.innerHTML = "<li>Aucune ressource à afficher</li>";
-    }
+    (llmData.autresModules || []).forEach(m => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${m.titre}</strong>`;
+      if (m.items?.length) {
+        const subUl = document.createElement("ul");
+        m.items.forEach(it => {
+          const subLi = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = it.lien;
+          a.textContent = it.nom;
+          a.target = "_blank";
+          subLi.appendChild(a);
+          subUl.appendChild(subLi);
+        });
+        li.appendChild(subUl);
+      }
+      autresList.appendChild(li);
+    });
 
     // Livrables
     livrablesList.innerHTML = "";
-    if (llmData.livrables?.length) {
-      llmData.livrables.forEach(l => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${l.titre}</strong> (${l.type}) `;
-        const btn = document.createElement("button");
-        btn.textContent = "Télécharger Template";
-        btn.addEventListener("click", () => generateTemplate(l));
-        li.appendChild(btn);
-        livrablesList.appendChild(li);
-      });
-    } else {
-      livrablesList.innerHTML = "<li>Aucun livrable à afficher</li>";
-    }
+    (llmData.livrables || []).forEach(l => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${l.titre}</strong> (${l.type}) `;
+      const btn = document.createElement("button");
+      btn.textContent = "Télécharger Template";
+      btn.addEventListener("click", () => generateTemplate(l));
+      li.appendChild(btn);
+      livrablesList.appendChild(li);
+    });
   }
 
   // --- Charger JSON ---
@@ -155,34 +135,42 @@ document.addEventListener("DOMContentLoaded", () => {
     window.open("https://chatgpt.com/", "_blank");
   });
 
-  // --- Générer livrable DOCX/PPTX/XLSX ---
+  // --- Génération livrables ---
   function generateTemplate(l) {
+    // DOCX
     if (l.type === "docx") {
-      const content = l.template?.plan?.map(p => `# ${p}\n\n`).join("") || "Rapport vide";
-      const blob = new Blob([content], {type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `${l.titre}.docx`;
-      a.click();
+      const { Document, Packer, Paragraph, TextRun } = docx;
+      const doc = new Document({
+        sections: [{
+          children: (l.template.plan || []).map(p => new Paragraph({ children: [new TextRun({ text: p, bold: true, size: 24 }), new TextRun({ text: "\n\n" })] }))
+        }]
+      });
+      Packer.toBlob(doc).then(blob => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${l.titre}.docx`;
+        a.click();
+      });
     } 
+    // PPTX
     else if (l.type === "pptx") {
       const pptx = new PptxGenJS();
-      l.template?.slides?.forEach(slideTitle => {
+      (l.template.slides || []).forEach(slideTitle => {
         const slide = pptx.addSlide();
         slide.addText(slideTitle, { x:1, y:1, fontSize:24 });
       });
       pptx.writeFile({ fileName: `${l.titre}.pptx` });
     } 
+    // XLSX
     else if (l.type === "xlsx") {
       const wb = XLSX.utils.book_new();
-      l.template?.sheets?.forEach(sheetName => {
-        const ws = XLSX.utils.aoa_to_sheet([[""]]); 
+      (l.template.sheets || []).forEach(sheetName => {
+        const ws = XLSX.utils.aoa_to_sheet([[""]]);
         XLSX.utils.book_append_sheet(wb, ws, sheetName);
       });
       XLSX.writeFile(wb, `${l.titre}.xlsx`);
     } 
-    else {
-      alert("Type de livrable inconnu !");
-    }
+    else alert("Type de livrable inconnu !");
   }
+
 });
