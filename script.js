@@ -164,11 +164,24 @@ document.addEventListener("DOMContentLoaded", () => {
       a.href = URL.createObjectURL(blob);
       a.download = `${l.titre}.docx`;
       a.click();
-    } else if (l.type === "pptx") {
-      alert("Téléchargement PPTX à implémenter avec pptxgenjs");
-    } else if (l.type === "xlsx") {
-      alert("Téléchargement XLSX à implémenter avec SheetJS");
-    } else {
+    } 
+    else if (l.type === "pptx") {
+      const pptx = new PptxGenJS();
+      l.template?.slides?.forEach(slideTitle => {
+        const slide = pptx.addSlide();
+        slide.addText(slideTitle, { x:1, y:1, fontSize:24 });
+      });
+      pptx.writeFile({ fileName: `${l.titre}.pptx` });
+    } 
+    else if (l.type === "xlsx") {
+      const wb = XLSX.utils.book_new();
+      l.template?.sheets?.forEach(sheetName => {
+        const ws = XLSX.utils.aoa_to_sheet([[""]]); 
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      });
+      XLSX.writeFile(wb, `${l.titre}.xlsx`);
+    } 
+    else {
       alert("Type de livrable inconnu !");
     }
   }
