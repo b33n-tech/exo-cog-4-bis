@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // --- Sélecteurs ---
   const jalonsList = document.getElementById("jalonsList");
   const messagesTableBody = document.querySelector("#messagesTable tbody");
   const rdvList = document.getElementById("rdvList");
@@ -8,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadJson = document.getElementById("uploadJson");
   const loadBtn = document.getElementById("loadBtn");
   const uploadStatus = document.getElementById("uploadStatus");
-
   const generateMailBtn = document.getElementById("generateMailBtn");
   const mailPromptSelect = document.getElementById("mailPromptSelect");
 
@@ -19,15 +17,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let llmData = null;
 
+  // --- Render modules ---
   function renderModules() {
     if (!llmData) return;
 
-    // --- Jalons ---
+    // Jalons
     jalonsList.innerHTML = "";
     if (llmData.jalons?.length) {
       llmData.jalons.forEach(j => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong>${j.titre || "Sans titre"}</strong> (${j.datePrévue || "N/A"})`;
+        li.innerHTML = `<strong>${j.titre}</strong> (${j.datePrévue})`;
         if (j.sousActions?.length) {
           const subUl = document.createElement("ul");
           j.sousActions.forEach(s => {
@@ -37,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cb.checked = s.statut === "fait";
             cb.addEventListener("change", () => s.statut = cb.checked ? "fait" : "à faire");
             subLi.appendChild(cb);
-            subLi.appendChild(document.createTextNode(s.texte || "Sans texte"));
+            subLi.appendChild(document.createTextNode(s.texte));
             subUl.appendChild(subLi);
           });
           li.appendChild(subUl);
@@ -48,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       jalonsList.innerHTML = "<li>Aucun jalon à afficher</li>";
     }
 
-    // --- Messages ---
+    // Messages
     messagesTableBody.innerHTML = "";
     if (llmData.messages?.length) {
       llmData.messages.forEach(m => {
@@ -56,44 +55,44 @@ document.addEventListener("DOMContentLoaded", () => {
         const tdCheck = document.createElement("td");
         const cb = document.createElement("input");
         cb.type = "checkbox";
-        cb.checked = m.envoyé || false;
+        cb.checked = m.envoyé;
         cb.addEventListener("change", () => m.envoyé = cb.checked);
         tdCheck.appendChild(cb);
         tr.appendChild(tdCheck);
-        tr.appendChild(document.createElement("td")).textContent = m.destinataire || "-";
-        tr.appendChild(document.createElement("td")).textContent = m.sujet || "-";
-        tr.appendChild(document.createElement("td")).textContent = m.texte || "-";
+        tr.appendChild(document.createElement("td")).textContent = m.destinataire;
+        tr.appendChild(document.createElement("td")).textContent = m.sujet;
+        tr.appendChild(document.createElement("td")).textContent = m.texte;
         messagesTableBody.appendChild(tr);
       });
     } else {
       messagesTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center">Aucun message à afficher</td></tr>`;
     }
 
-    // --- RDV ---
+    // RDV
     rdvList.innerHTML = "";
     if (llmData.rdv?.length) {
       llmData.rdv.forEach(r => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong>${r.titre || "Sans titre"}</strong> - ${r.date || "N/A"} (${r.durée || "N/A"}) - Participants: ${(r.participants || []).join(", ")}`;
+        li.innerHTML = `<strong>${r.titre}</strong> - ${r.date} (${r.durée}) - Participants: ${r.participants.join(", ")}`;
         rdvList.appendChild(li);
       });
     } else {
       rdvList.innerHTML = "<li>Aucun rendez-vous à afficher</li>";
     }
 
-    // --- Autres ressources ---
+    // Autres ressources
     autresList.innerHTML = "";
     if (llmData.autresModules?.length) {
       llmData.autresModules.forEach(m => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong>${m.titre || "Sans titre"}</strong>`;
+        li.innerHTML = `<strong>${m.titre}</strong>`;
         if (m.items?.length) {
           const subUl = document.createElement("ul");
           m.items.forEach(it => {
             const subLi = document.createElement("li");
             const a = document.createElement("a");
-            a.href = it.lien || "#";
-            a.textContent = it.nom || "Sans nom";
+            a.href = it.lien;
+            a.textContent = it.nom;
             a.target = "_blank";
             subLi.appendChild(a);
             subUl.appendChild(subLi);
@@ -106,19 +105,16 @@ document.addEventListener("DOMContentLoaded", () => {
       autresList.innerHTML = "<li>Aucune ressource à afficher</li>";
     }
 
-    // --- Livrables ---
+    // Livrables
     livrablesList.innerHTML = "";
     if (llmData.livrables?.length) {
       llmData.livrables.forEach(l => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong>${l.titre}</strong> (${l.type})`;
-
+        li.innerHTML = `<strong>${l.titre}</strong> (${l.type}) `;
         const btn = document.createElement("button");
         btn.textContent = "Télécharger Template";
         btn.addEventListener("click", () => generateTemplate(l));
-        li.appendChild(document.createTextNode(" "));
         li.appendChild(btn);
-
         livrablesList.appendChild(li);
       });
     } else {
@@ -129,17 +125,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Charger JSON ---
   loadBtn.addEventListener("click", () => {
     const file = uploadJson.files[0];
-    if (!file) {
-      alert("Choisis un fichier JSON LLM !");
-      return;
-    }
+    if (!file) { alert("Choisis un fichier JSON LLM !"); return; }
     const reader = new FileReader();
     reader.onload = e => {
       try {
         llmData = JSON.parse(e.target.result);
         renderModules();
         uploadStatus.textContent = `Fichier "${file.name}" chargé avec succès !`;
-      } catch (err) {
+      } catch(err) {
         console.error(err);
         alert("Fichier JSON invalide !");
         uploadStatus.textContent = "";
@@ -152,16 +145,31 @@ document.addEventListener("DOMContentLoaded", () => {
   generateMailBtn.addEventListener("click", () => {
     if (!llmData?.messages) return;
     const selectedMessages = llmData.messages.filter(m => m.envoyé);
-    if (selectedMessages.length === 0) {
-      alert("Coche au moins un message !");
-      return;
-    }
+    if (!selectedMessages.length) { alert("Coche au moins un message !"); return; }
     const promptId = mailPromptSelect.value;
     const promptTexte = mailPrompts[promptId];
-    const content = selectedMessages.map(m =>
-      `À: ${m.destinataire || "-"}\nSujet: ${m.sujet || "-"}\nMessage: ${m.texte || "-"}`
-    ).join("\n\n");
-    const finalPrompt = `${promptTexte}\n\n${content}`;
-    navigator.clipboard.writeText(finalPrompt)
+    const content = selectedMessages.map(m => `À: ${m.destinataire}\nSujet: ${m.sujet}\nMessage: ${m.texte}`).join("\n\n");
+    navigator.clipboard.writeText(`${promptTexte}\n\n${content}`)
       .then(() => alert("Prompt + messages copiés dans le presse-papiers !"))
-      .catch(err
+      .catch(err => console.error("Erreur copie: ", err));
+    window.open("https://chatgpt.com/", "_blank");
+  });
+
+  // --- Générer livrable DOCX/PPTX/XLSX ---
+  function generateTemplate(l) {
+    if (l.type === "docx") {
+      const content = l.template?.plan?.map(p => `# ${p}\n\n`).join("") || "Rapport vide";
+      const blob = new Blob([content], {type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${l.titre}.docx`;
+      a.click();
+    } else if (l.type === "pptx") {
+      alert("Téléchargement PPTX à implémenter avec pptxgenjs");
+    } else if (l.type === "xlsx") {
+      alert("Téléchargement XLSX à implémenter avec SheetJS");
+    } else {
+      alert("Type de livrable inconnu !");
+    }
+  }
+});
